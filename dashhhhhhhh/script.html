@@ -1,0 +1,1934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DARKAN HISTORIC WEATHER DATA - MONGOLIA</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #1a73e8;
+            --secondary: #34a853;
+            --danger: #ea4335;
+            --warning: #fbbc04;
+            --dark: #202124;
+            --light: #f8f9fa;
+            --gray: #5f6368;
+            --light-gray: #dadce0;
+            --card-bg: #ffffff;
+            --sidebar-bg: #f1f3f4;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark);
+            min-height: 100vh;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            min-height: 100vh;
+            max-width: 100vw;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            background-color: var(--sidebar-bg);
+            padding: 15px;
+            border-right: 1px solid var(--light-gray);
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .logo i {
+            font-size: 22px;
+            color: var(--primary);
+            margin-right: 8px;
+        }
+
+        .logo h1 {
+            font-size: 18px;
+            color: var(--dark);
+        }
+
+        .nav-tabs {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            margin-bottom: 20px;
+        }
+
+        .nav-tab {
+            padding: 10px 12px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            color: var(--gray);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .nav-tab i {
+            margin-right: 8px;
+            width: 18px;
+            font-size: 16px;
+        }
+
+        .nav-tab:hover {
+            background-color: rgba(26, 115, 232, 0.1);
+            color: var(--primary);
+        }
+
+        .nav-tab.active {
+            background-color: rgba(26, 115, 232, 0.15);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .filter-section {
+            margin-bottom: 20px;
+        }
+
+        .filter-section h3 {
+            font-size: 15px;
+            margin-bottom: 8px;
+            color: var(--dark);
+        }
+
+        .filter-select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid var(--light-gray);
+            background-color: white;
+            margin-bottom: 8px;
+            font-size: 13px;
+            height: 36px;
+        }
+
+        .calendar-container {
+            margin-top: 10px;
+        }
+
+        .calendar-container h4 {
+            font-size: 13px;
+            margin-bottom: 5px;
+            color: var(--gray);
+        }
+
+        .data-source-toggle {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .data-source-btn {
+            flex: 1;
+            padding: 6px;
+            border-radius: 5px;
+            font-size: 12px;
+            background-color: var(--light);
+            border: 1px solid var(--light-gray);
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .data-source-btn.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            padding: 15px;
+            overflow-y: auto;
+            max-height: 100vh;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .header h2 {
+            color: var(--dark);
+            font-size: 20px;
+        }
+
+        .last-update {
+            color: var(--gray);
+            font-size: 13px;
+            background-color: rgba(52, 168, 83, 0.1);
+            padding: 6px 12px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .last-update i {
+            margin-right: 6px;
+            color: var(--secondary);
+            font-size: 12px;
+        }
+
+        /* Compact Stats */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background-color: var(--card-bg);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            border-left: 4px solid var(--primary);
+        }
+
+        .stat-card h3 {
+            font-size: 13px;
+            color: var(--gray);
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 3px;
+        }
+
+        .stat-change {
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+        }
+
+        .stat-change.positive {
+            color: var(--secondary);
+        }
+
+        .stat-change.negative {
+            color: var(--danger);
+        }
+
+        .stat-change i {
+            margin-right: 4px;
+            font-size: 10px;
+        }
+
+        /* Full Width Chart */
+        .chart-container {
+            margin-bottom: 20px;
+        }
+
+        .chart-card {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            height: 380px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chart-card h3 {
+            margin-bottom: 15px;
+            color: var(--dark);
+            font-size: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chart-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .chart-control {
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            background-color: var(--light);
+            border: 1px solid var(--light-gray);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .chart-control:hover {
+            background-color: #e8f0fe;
+        }
+
+        .chart-control.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .date-info {
+            font-size: 12px;
+            color: var(--gray);
+            background-color: #f8f9fa;
+            padding: 4px 10px;
+            border-radius: 12px;
+            border: 1px solid var(--light-gray);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .date-info i {
+            color: var(--primary);
+            font-size: 11px;
+        }
+
+        .chart-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        /* Compact Table */
+        .table-container {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            margin-bottom: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .table-container h3 {
+            margin-bottom: 15px;
+            color: var(--dark);
+            font-size: 18px;
+            position: sticky;
+            top: 0;
+            background-color: var(--card-bg);
+            padding-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .zone-indicator {
+            font-size: 13px;
+            color: var(--primary);
+            background-color: rgba(26, 115, 232, 0.1);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px 15px;
+            border-bottom: 2px solid var(--light-gray);
+            color: var(--gray);
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            background-color: var(--card-bg);
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+
+        .status-normal {
+            background-color: var(--secondary);
+        }
+
+        .status-deficit {
+            background-color: var(--danger);
+        }
+
+        .status-excess {
+            background-color: var(--warning);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 15px;
+            color: var(--gray);
+            font-size: 13px;
+            border-top: 1px solid var(--light-gray);
+            margin-top: 10px;
+        }
+
+        .mobile-menu-toggle {
+            display: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--primary);
+            margin-right: 10px;
+        }
+
+        /* Weather icon in stats */
+        .weather-icon {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            font-size: 24px;
+            opacity: 0.8;
+        }
+
+        .stat-card:nth-child(1) .weather-icon { color: #1a73e8; } /* Rainfall - blue */
+        .stat-card:nth-child(2) .weather-icon { color: #fbbc04; } /* Temperature - orange */
+        .stat-card:nth-child(3) .weather-icon { color: #34a853; } /* Humidity - green */
+        .stat-card:nth-child(4) .weather-icon { color: #ea4335; } /* Wind - red */
+
+        /* Compact view for small screens */
+        @media (max-width: 992px) {
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .chart-card {
+                height: 320px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                display: none;
+                position: fixed;
+                height: 100vh;
+                z-index: 100;
+                width: 260px;
+                top: 0;
+                left: 0;
+            }
+            
+            .sidebar.active {
+                display: block;
+            }
+            
+            .mobile-menu-toggle {
+                display: block;
+            }
+            
+            .main-content {
+                padding: 10px;
+            }
+            
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-card {
+                height: 280px;
+                padding: 15px;
+            }
+            
+            .chart-card h3 {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .chart-controls {
+                flex-wrap: wrap;
+            }
+            
+            .table-container {
+                max-height: 250px;
+            }
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="logo">
+                <i class="fas fa-cloud-sun-rain"></i>
+                <h1>AGROSHIELD </h1>
+            </div>
+            
+            <div class="nav-tabs">
+                <div class="nav-tab active">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </div>
+               <!-- <div class="nav-tab">
+                    <i class="fas fa-map-marked-alt"></i>
+                    <span>Map View</span>
+                </div>
+                <div class="nav-tab">
+                    <i class="fas fa-download"></i>
+                    <span>Export Data</span>
+                </div>
+                <div class="nav-tab">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </div>-->
+            </div>
+            
+            <div class="filter-section">
+                <h3>Data Filters</h3>
+                
+                <select class="filter-select" id="parameter-select">
+                    <option value="rainfall">Rainfall</option>
+                    <option value="temperature">Temperature</option>
+                    <option value="humidity">Humidity</option>
+                    <option value="wind">Wind Speed</option>
+                    <option value="pressure">Pressure</option>
+                </select>
+                
+                <select class="filter-select" id="zone-select">
+                    <option value="all">All Zones</option>
+                    <option value="North West">North West</option>
+                    <option value="North Center">North Center</option>
+                    <option value="North East">North East</option>
+                    <option value="South West">South West</option>
+                    <option value="South Central">South Central</option>
+                    <option value="SouthEast">SouthEast</option>
+                </select>
+                
+                <select class="filter-select" id="district-select">
+                    <option value="all">All Districts</option>
+                    <!-- Districts will be populated by JavaScript -->
+                </select>
+                
+                <select class="filter-select" id="block-select">
+                    <option value="all">All Blocks</option>
+                    <!-- Blocks will be populated by JavaScript -->
+                </select>
+                
+                <div class="calendar-container">
+                    <h4>Date Range</h4>
+                    <input type="text" class="filter-select" id="date-range" placeholder="Select date range">
+                </div>
+                
+                <div class="data-source-toggle">
+                    <button id="historic-btn" class="data-source-btn active">Historic</button>
+                    <button id="daily-btn" class="data-source-btn">Daily</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <div style="display: flex; align-items: center;">
+                    <i class="fas fa-bars mobile-menu-toggle" id="mobile-menu-toggle"></i>
+                    <h2>DARKHAN HISTORIC DATA</h2>
+                </div>
+                <div class="last-update" id="update-indicator">
+                    <i class="fas fa-sync-alt"></i>
+                    <span>Last updated: Today 11:00 AM</span>
+                </div>
+            </div>
+            
+            <!-- Stats Cards -->
+            <div class="stats-container">
+                <div class="stat-card">
+                    <i class="fas fa-cloud-rain weather-icon"></i>
+                    <h3>Current Rainfall</h3>
+                    <div class="stat-value">158.0 mm</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i>
+                        8.5% above normal
+                    </div>
+                </div>
+                
+                <div class="stat-card" style="border-left-color: var(--warning);">
+                    <i class="fas fa-thermometer-half weather-icon"></i>
+                    <h3>Temperature</h3>
+                    <div class="stat-value">31.2°C</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i>
+                        2.3% above normal
+                    </div>
+                </div>
+                
+                <div class="stat-card" style="border-left-color: var(--secondary);">
+                    <i class="fas fa-tint weather-icon"></i>
+                    <h3>Humidity</h3>
+                    <div class="stat-value">67.8%</div>
+                    <div class="stat-change negative">
+                        <i class="fas fa-arrow-down"></i>
+                        5.7% below normal
+                    </div>
+                </div>
+                
+                <div class="stat-card" style="border-left-color: var(--danger);">
+                    <i class="fas fa-wind weather-icon"></i>
+                    <h3>Wind Speed</h3>
+                    <div class="stat-value">12.4 km/h</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i>
+                        1.8% above normal
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Full Width Chart -->
+            <div class="chart-container">
+                <div class="chart-card">
+                    <h3>
+                        <span id="main-chart-title">Rainfall Deviation from Normal</span>
+                        <div class="chart-controls">
+                            <button class="chart-control active" data-period="daily">
+                                <i class="fas fa-calendar-day"></i> Daily
+                            </button>
+                            <button class="chart-control" data-period="monthly">
+                                <i class="fas fa-calendar-alt"></i> Monthly
+                            </button>
+                            <button class="chart-control" data-period="yearly">
+                                <i class="fas fa-calendar"></i> Yearly
+                            </button>
+                            <div class="date-info" id="date-range-info">
+                                <i class="far fa-calendar"></i>
+                                <span>Current Month</span>
+                            </div>
+                        </div>
+                    </h3>
+                    <div class="chart-wrapper">
+                        <canvas id="main-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Deficient Areas Table -->
+            <div class="table-container">
+                <h3>
+                    <span id="deficient-title">Rainfall Deficient Areas</span>
+                    <span class="zone-indicator" id="zone-indicator">All Zones</span>
+                </h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Zone</th>
+                            <th>District</th>
+                            <th>Block</th>
+                            <th>Deviation</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="deficient-areas">
+                        <!-- Data will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="footer">
+                <p>BMSK Weather Analytics Dashboard | Data updates daily at 11:00 AM</p>
+                <p>© 2025 Bihar Weather Monitoring System. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Bihar District and Block Data
+        const biharData =[
+            // North West Zone
+            { zone: "North West", district: "East Champaran", block: "Adapur" },
+            { zone: "North West", district: "East Champaran", block: "Areraj" },
+            { zone: "North West", district: "East Champaran", block: "Banjaria" },
+            { zone: "North West", district: "East Champaran", block: "Bankatwa" },
+            { zone: "North West", district: "East Champaran", block: "Chakia (Pipra)" },
+            { zone: "North West", district: "East Champaran", block: "Chauradano" },
+            { zone: "North West", district: "East Champaran", block: "Chiraia" },
+            { zone: "North West", district: "East Champaran", block: "Dhaka" },
+            { zone: "North West", district: "East Champaran", block: "Ghorasahan" },
+            { zone: "North West", district: "East Champaran", block: "Harsidhi" },
+            { zone: "North West", district: "East Champaran", block: "Kalyanpur" },
+            { zone: "North West", district: "East Champaran", block: "Kesaria" },
+            { zone: "North West", district: "East Champaran", block: "Kotwa" },
+            { zone: "North West", district: "East Champaran", block: "Madhuban" },
+            { zone: "North West", district: "East Champaran", block: "Mehsi" },
+            { zone: "North West", district: "East Champaran", block: "Motihari" },
+            { zone: "North West", district: "East Champaran", block: "Paharpur" },
+            { zone: "North West", district: "East Champaran", block: "Pakridayal" },
+            { zone: "North West", district: "East Champaran", block: "Patahi" },
+            { zone: "North West", district: "East Champaran", block: "Phenhara" },
+            { zone: "North West", district: "East Champaran", block: "Piprakothi" },
+            { zone: "North West", district: "East Champaran", block: "Ramgarhwa" },
+            { zone: "North West", district: "East Champaran", block: "Raxaul" },
+            { zone: "North West", district: "East Champaran", block: "Sangrampur-2" },
+            { zone: "North West", district: "East Champaran", block: "Sugauli" },
+            { zone: "North West", district: "East Champaran", block: "Tetaria" },
+            { zone: "North West", district: "East Champaran", block: "Turkaulia" },
+            { zone: "North West", district: "Gopalganj", block: "Baikunthpur" },
+            { zone: "North West", district: "Gopalganj", block: "Barauli" },
+            { zone: "North West", district: "Gopalganj", block: "Bhorey" },
+            { zone: "North West", district: "Gopalganj", block: "Bijaipur" },
+            { zone: "North West", district: "Gopalganj", block: "Gopalganj" },
+            { zone: "North West", district: "Gopalganj", block: "Hathua" },
+            { zone: "North West", district: "Gopalganj", block: "Katiya" },
+            { zone: "North West", district: "Gopalganj", block: "Kuchaikote" },
+            { zone: "North West", district: "Gopalganj", block: "Manjha" },
+            { zone: "North West", district: "Gopalganj", block: "Pach deuri" },
+            { zone: "North West", district: "Gopalganj", block: "Phulwaria" },
+            { zone: "North West", district: "Gopalganj", block: "Sidhwalia" },
+            { zone: "North West", district: "Gopalganj", block: "Thawe" },
+            { zone: "North West", district: "Gopalganj", block: "Uchkagaon" },
+            { zone: "North West", district: "Saran", block: "Amnour" },
+            { zone: "North West", district: "Saran", block: "Baniapur" },
+            { zone: "North West", district: "Saran", block: "Chhapra" },
+            { zone: "North West", district: "Saran", block: "Dariapur" },
+            { zone: "North West", district: "Saran", block: "Dighwara" },
+            { zone: "North West", district: "Saran", block: "Ekma" },
+            { zone: "North West", district: "Saran", block: "Garkha" },
+            { zone: "North West", district: "Saran", block: "Ishupur" },
+            { zone: "North West", district: "Saran", block: "Jalalpur" },
+            { zone: "North West", district: "Saran", block: "Lahladpur" },
+            { zone: "North West", district: "Saran", block: "Maker" },
+            { zone: "North West", district: "Saran", block: "Manjhi" },
+            { zone: "North West", district: "Saran", block: "Marhaura" },
+            { zone: "North West", district: "Saran", block: "Mashrakh" },
+            { zone: "North West", district: "Saran", block: "Nagra" },
+            { zone: "North West", district: "Saran", block: "Panapur" },
+            { zone: "North West", district: "Saran", block: "Parsa" },
+            { zone: "North West", district: "Saran", block: "Revilganj" },
+            { zone: "North West", district: "Saran", block: "Sonepur" },
+            { zone: "North West", district: "Saran", block: "Taraiya" },
+            { zone: "North West", district: "Siwan", block: "Andar" },
+            { zone: "North West", district: "Siwan", block: "Barharia" },
+            { zone: "North West", district: "Siwan", block: "Basantpur-1" },
+            { zone: "North West", district: "Siwan", block: "Bhagwanpur Hat-4" },
+            { zone: "North West", district: "Siwan", block: "Darauli" },
+            { zone: "North West", district: "Siwan", block: "Daraundha" },
+            { zone: "North West", district: "Siwan", block: "Goriakothi" },
+            { zone: "North West", district: "Siwan", block: "Guthani" },
+            { zone: "North West", district: "Siwan", block: "Hasanpura" },
+            { zone: "North West", district: "Siwan", block: "Hussainganj" },
+            { zone: "North West", district: "Siwan", block: "Lakri Nabiganj" },
+            { zone: "North West", district: "Siwan", block: "Maharajganj" },
+            { zone: "North West", district: "Siwan", block: "Mairwa" },
+            { zone: "North West", district: "Siwan", block: "Nautan" },
+            { zone: "North West", district: "Siwan", block: "Pachrukhi" },
+            { zone: "North West", district: "Siwan", block: "Raghunathpur" },
+            { zone: "North West", district: "Siwan", block: "Siswan" },
+            { zone: "North West", district: "Siwan", block: "Siwan Sadar" },
+            { zone: "North West", district: "Siwan", block: "Ziradei" },
+            { zone: "North West", district: "West Champaran", block: "Bagha-I" },
+            { zone: "North West", district: "West Champaran", block: "Bagha-II" },
+            { zone: "North West", district: "West Champaran", block: "Bairia" },
+            { zone: "North West", district: "West Champaran", block: "Bettiah" },
+            { zone: "North West", district: "West Champaran", block: "Bhitaha" },
+            { zone: "North West", district: "West Champaran", block: "Chanpatia" },
+            { zone: "North West", district: "West Champaran", block: "Gaunaha" },
+            { zone: "North West", district: "West Champaran", block: "Lauriya" },
+            { zone: "North West", district: "West Champaran", block: "Madhubani" },
+            { zone: "North West", district: "West Champaran", block: "Mainatand" },
+            { zone: "North West", district: "West Champaran", block: "Majhaulia" },
+            { zone: "North West", district: "West Champaran", block: "Narkatiaganj" },
+            { zone: "North West", district: "West Champaran", block: "Nautan-2" },
+            { zone: "North West", district: "West Champaran", block: "Piprasi" },
+            { zone: "North West", district: "West Champaran", block: "Ramnagar" },
+            { zone: "North West", district: "West Champaran", block: "Sikta" },
+            { zone: "North West", district: "West Champaran", block: "Thakrahan" },
+            { zone: "North West", district: "West Champaran", block: "Yogapatti" },
+            
+            // North Center Zone
+            { zone: "North Center", district: "Darbhanga", block: "Alinagar" },
+            { zone: "North Center", district: "Darbhanga", block: "Bahadurpur" },
+            { zone: "North Center", district: "Darbhanga", block: "Baheri" },
+            { zone: "North Center", district: "Darbhanga", block: "Benipur" },
+            { zone: "North Center", district: "Darbhanga", block: "Biraul" },
+            { zone: "North Center", district: "Darbhanga", block: "Darbhanga Sadar" },
+            { zone: "North Center", district: "Darbhanga", block: "Ghanshyampur" },
+            { zone: "North Center", district: "Darbhanga", block: "Gora Bauram" },
+            { zone: "North Center", district: "Darbhanga", block: "Hanuman Nagar" },
+            { zone: "North Center", district: "Darbhanga", block: "Hayaghat" },
+            { zone: "North Center", district: "Darbhanga", block: "Jale" },
+            { zone: "North Center", district: "Darbhanga", block: "Keotiranway" },
+            { zone: "North Center", district: "Darbhanga", block: "Kiratpur" },
+            { zone: "North Center", district: "Darbhanga", block: "Kusheshwar Asthan" },
+            { zone: "North Center", district: "Darbhanga", block: "Kusheshwar Asthan Purbi" },
+            { zone: "North Center", district: "Darbhanga", block: "Manigachhi" },
+            { zone: "North Center", district: "Darbhanga", block: "Singhwara" },
+            { zone: "North Center", district: "Darbhanga", block: "Tardih" },
+            { zone: "North Center", district: "Madhubani", block: "Andhra tharhi" },
+            { zone: "North Center", district: "Madhubani", block: "Babu barhi" },
+            { zone: "North Center", district: "Madhubani", block: "Basopatti" },
+            { zone: "North Center", district: "Madhubani", block: "Benipatti" },
+            { zone: "North Center", district: "Madhubani", block: "Bisfi" },
+            { zone: "North Center", district: "Madhubani", block: "Ghoghardiha" },
+            { zone: "North Center", district: "Madhubani", block: "Harlakhi" },
+            { zone: "North Center", district: "Madhubani", block: "Jaynagar" },
+            { zone: "North Center", district: "Madhubani", block: "Jhanjharpur" },
+            { zone: "North Center", district: "Madhubani", block: "Kaluahi" },
+            { zone: "North Center", district: "Madhubani", block: "Khajauli" },
+            { zone: "North Center", district: "Madhubani", block: "Khutona" },
+            { zone: "North Center", district: "Madhubani", block: "Ladania" },
+            { zone: "North Center", district: "Madhubani", block: "Lakhnaur" },
+            { zone: "North Center", district: "Madhubani", block: "Laukahi" },
+            { zone: "North Center", district: "Madhubani", block: "Madhepur" },
+            { zone: "North Center", district: "Madhubani", block: "Madhwapur" },
+            { zone: "North Center", district: "Madhubani", block: "Pandaul" },
+            { zone: "North Center", district: "Madhubani", block: "Phulparas" },
+            { zone: "North Center", district: "Madhubani", block: "Rahika" },
+            { zone: "North Center", district: "Madhubani", block: "Rajnagar" },
+            { zone: "North Center", district: "Muzaffarpur", block: "Aurai" },
+            { zone: "North Center", district: "Muzaffarpur", block: "Bandra" },
+            { zone: "North Center", district: "Muzaffarpur", block: "Baruraj (Motipur)" },
+            { zone: "North Center", district: "Muzaffarpur", block: "Bochaha" },
+            { zone: "North Center", district: "Muzaffarpur", block: "Dholi (Moraul)" },
+            { zone: "North Center", district: "Muzaffarpur", block: "Gaighat" },
+            { zone: "North Center", district: "Muzaffarpur", block: "Kanti" },
+            { zone: "North Center", district: "Muzaffarpur", block: "Katra" },
+            { zone: "North Center", district: "Muzaffarpur", block: "Kurhani" },
+            { zone: "North Center", district: "Muzaffarpur", block: "Marwan" },
+            { zone: "North Center", district: "Muzaffarpur", block: "Minapur" },
+            { zone: "North Center", district: "Muzaffarpur", block: "Mushahari" },
+            { zone: "North Center", district: "Muzaffarpur", block: "MIT Campus" },
+            { zone: "North Center", district: "Muzaffarpur", block: "Paroo" },
+            { zone: "North Center", district: "Muzaffarpur", block: "Sahebganj" },
+            { zone: "North Center", district: "Muzaffarpur", block: "Sakra" },
+            { zone: "North Center", district: "Muzaffarpur", block: "Saraiya" },
+            { zone: "North Center", district: "Samastipur", block: "Bibhutpur" },
+            { zone: "North Center", district: "Samastipur", block: "Bithan" },
+            { zone: "North Center", district: "Samastipur", block: "Dalsinghsarai" },
+            { zone: "North Center", district: "Samastipur", block: "Hasanpur" },
+            { zone: "North Center", district: "Samastipur", block: "Kalyanpur-2" },
+            { zone: "North Center", district: "Samastipur", block: "Khanpur" },
+            { zone: "North Center", district: "Samastipur", block: "Mohanpur-1" },
+            { zone: "North Center", district: "Samastipur", block: "Mohiuddinagar" },
+            { zone: "North Center", district: "Samastipur", block: "Patori" },
+            { zone: "North Center", district: "Samastipur", block: "Pusa" },
+            { zone: "North Center", district: "Samastipur", block: "Rosera" },
+            { zone: "North Center", district: "Samastipur", block: "Samastipur" },
+            { zone: "North Center", district: "Samastipur", block: "Sarairanjan" },
+            { zone: "North Center", district: "Samastipur", block: "Shivaji nagar" },
+            { zone: "North Center", district: "Samastipur", block: "Singhiya" },
+            { zone: "North Center", district: "Samastipur", block: "Tajpur" },
+            { zone: "North Center", district: "Samastipur", block: "Tajpur Morwa" },
+            { zone: "North Center", district: "Samastipur", block: "Ujiarpur" },
+            { zone: "North Center", district: "Samastipur", block: "Vidyapati Nagar" },
+            { zone: "North Center", district: "Samastipur", block: "Warisnagar" },
+            { zone: "North Center", district: "Sheohar", block: "Dumri Katsari" },
+            { zone: "North Center", district: "Sheohar", block: "Piprarhi" },
+            { zone: "North Center", district: "Sheohar", block: "Purnahiya" },
+            { zone: "North Center", district: "Sheohar", block: "Sheohar" },
+            { zone: "North Center", district: "Sheohar", block: "Tariani Chowk" },
+            { zone: "North Center", district: "Sitamarhi", block: "Bairgania" },
+            { zone: "North Center", district: "Sitamarhi", block: "Bajpatti" },
+            { zone: "North Center", district: "Sitamarhi", block: "Bathnaha" },
+            { zone: "North Center", district: "Sitamarhi", block: "Belsand" },
+            { zone: "North Center", district: "Sitamarhi", block: "Bokhra" },
+            { zone: "North Center", district: "Sitamarhi", block: "Charaut" },
+            { zone: "North Center", district: "Sitamarhi", block: "Dumra" },
+            { zone: "North Center", district: "Sitamarhi", block: "Majorganj" },
+            { zone: "North Center", district: "Sitamarhi", block: "Nanpur" },
+            { zone: "North Center", district: "Sitamarhi", block: "Parihar" },
+            { zone: "North Center", district: "Sitamarhi", block: "Parsauni" },
+            { zone: "North Center", district: "Sitamarhi", block: "Pupri" },
+            { zone: "North Center", district: "Sitamarhi", block: "Riga" },
+            { zone: "North Center", district: "Sitamarhi", block: "Runisaidpur" },
+            { zone: "North Center", district: "Sitamarhi", block: "Sonbarsa-1" },
+            { zone: "North Center", district: "Sitamarhi", block: "Suppi" },
+            { zone: "North Center", district: "Sitamarhi", block: "Sursand" },
+            { zone: "North Center", district: "Vaishali", block: "Bhagwanpur-6" },
+            { zone: "North Center", district: "Vaishali", block: "Bidupur" },
+            { zone: "North Center", district: "Vaishali", block: "Chehra Kalan" },
+            { zone: "North Center", district: "Vaishali", block: "Desri" },
+            { zone: "North Center", district: "Vaishali", block: "Goraul" },
+            { zone: "North Center", district: "Vaishali", block: "Hajipur" },
+            { zone: "North Center", district: "Vaishali", block: "Jandaha" },
+            { zone: "North Center", district: "Vaishali", block: "Lalganj" },
+            { zone: "North Center", district: "Vaishali", block: "Mahnar" },
+            { zone: "North Center", district: "Vaishali", block: "Mahua" },
+            { zone: "North Center", district: "Vaishali", block: "Patepur" },
+            { zone: "North Center", district: "Vaishali", block: "Paterhi Belsar" },
+            { zone: "North Center", district: "Vaishali", block: "Raghopur-1" },
+            { zone: "North Center", district: "Vaishali", block: "Raja pakar" },
+            { zone: "North Center", district: "Vaishali", block: "Sahdai Buzurg" },
+            { zone: "North Center", district: "Vaishali", block: "Vaishali" },
+            
+            // North East Zone
+            { zone: "North East", district: "Araria", block: "Araria" },
+            { zone: "North East", district: "Araria", block: "Bhargama" },
+            { zone: "North East", district: "Araria", block: "Forbesganj" },
+            { zone: "North East", district: "Araria", block: "Jokihat" },
+            { zone: "North East", district: "Araria", block: "Kursakatta" },
+            { zone: "North East", district: "Araria", block: "Narpatganj" },
+            { zone: "North East", district: "Araria", block: "Palasi" },
+            { zone: "North East", district: "Araria", block: "Raniganj" },
+            { zone: "North East", district: "Araria", block: "Sikti" },
+            { zone: "North East", district: "Kishanganj", block: "Bahadurganj" },
+            { zone: "North East", district: "Kishanganj", block: "Dighalbank" },
+            { zone: "North East", district: "Kishanganj", block: "Kishanganj" },
+            { zone: "North East", district: "Kishanganj", block: "Kochadhamin" },
+            { zone: "North East", district: "Kishanganj", block: "Pothia" },
+            { zone: "North East", district: "Kishanganj", block: "Terhagachh" },
+            { zone: "North East", district: "Kishanganj", block: "Thakurganj" },
+            { zone: "North East", district: "Madhepura", block: "Alamnagar" },
+            { zone: "North East", district: "Madhepura", block: "Bihariganj" },
+            { zone: "North East", district: "Madhepura", block: "Chausa" },
+            { zone: "North East", district: "Madhepura", block: "Gamharia" },
+            { zone: "North East", district: "Madhepura", block: "Ghailar" },
+            { zone: "North East", district: "Madhepura", block: "Gwalpara" },
+            { zone: "North East", district: "Madhepura", block: "Kumarkhand" },
+            { zone: "North East", district: "Madhepura", block: "Madhepura" },
+            { zone: "North East", district: "Madhepura", block: "Murliganj" },
+            { zone: "North East", district: "Madhepura", block: "Puraini" },
+            { zone: "North East", district: "Madhepura", block: "Shankarpur" },
+            { zone: "North East", district: "Madhepura", block: "Singheshwar" },
+            { zone: "North East", district: "Madhepura", block: "Udakisunpur" },
+            { zone: "North East", district: "Purnea", block: "Amour" },
+            { zone: "North East", district: "Purnea", block: "Baisa" },
+            { zone: "North East", district: "Purnea", block: "Baisi" },
+            { zone: "North East", district: "Purnea", block: "Banmankhi" },
+            { zone: "North East", district: "Purnea", block: "Barhara" },
+            { zone: "North East", district: "Purnea", block: "Bhawanipur" },
+            { zone: "North East", district: "Purnea", block: "Dagarua" },
+            { zone: "North East", district: "Purnea", block: "Dhamdaha" },
+            { zone: "North East", district: "Purnea", block: "Jalalgarh" },
+            { zone: "North East", district: "Purnea", block: "Kasba" },
+            { zone: "North East", district: "Purnea", block: "Krityanand Nagar" },
+            { zone: "North East", district: "Purnea", block: "Purnea East" },
+            { zone: "North East", district: "Purnea", block: "Rupauli" },
+            { zone: "North East", district: "Purnea", block: "Srinagar" },
+            { zone: "North East", district: "Saharsa", block: "Banma Itahari" },
+            { zone: "North East", district: "Saharsa", block: "Kahra" },
+            { zone: "North East", district: "Saharsa", block: "Mahishi" },
+            { zone: "North East", district: "Saharsa", block: "Nauhatta-1" },
+            { zone: "North East", district: "Saharsa", block: "Patarghat" },
+            { zone: "North East", district: "Saharsa", block: "Salkhua" },
+            { zone: "North East", district: "Saharsa", block: "Satar Kataiya" },
+            { zone: "North East", district: "Saharsa", block: "Saur Bazar" },
+            { zone: "North East", district: "Saharsa", block: "Simri Bakhtiarpur" },
+            { zone: "North East", district: "Saharsa", block: "Sonbarsa" },
+            { zone: "North East", district: "Supaul", block: "Basantpur" },
+            { zone: "North East", district: "Supaul", block: "Chhatapur" },
+            { zone: "North East", district: "Supaul", block: "Kishanpur" },
+            { zone: "North East", district: "Supaul", block: "Marauna" },
+            { zone: "North East", district: "Supaul", block: "Nirmali" },
+            { zone: "North East", district: "Supaul", block: "Pipra" },
+            { zone: "North East", district: "Supaul", block: "Pratapganj" },
+            { zone: "North East", district: "Supaul", block: "Raghopur" },
+            { zone: "North East", district: "Supaul", block: "Saraigarh Bhaptiahi" },
+            { zone: "North East", district: "Supaul", block: "Supaul" },
+            { zone: "North East", district: "Supaul", block: "Tribeniganj" },
+            
+            // South West Zone
+            { zone: "South West", district: "Arwal", block: "Arwal" },
+            { zone: "South West", district: "Arwal", block: "Kaler" },
+            { zone: "South West", district: "Arwal", block: "Kapri" },
+            { zone: "South West", district: "Arwal", block: "Kurtha" },
+            { zone: "South West", district: "Arwal", block: "Sonbhadra-Bansi-Surajpur" },
+            { zone: "South West", district: "Aurangabad", block: "Aurangabad" },
+            { zone: "South West", district: "Aurangabad", block: "Barun" },
+            { zone: "South West", district: "Aurangabad", block: "Daudnagar" },
+            { zone: "South West", district: "Aurangabad", block: "Deo" },
+            { zone: "South West", district: "Aurangabad", block: "Goh" },
+            { zone: "South West", district: "Aurangabad", block: "Haspura" },
+            { zone: "South West", district: "Aurangabad", block: "Kutumba" },
+            { zone: "South West", district: "Aurangabad", block: "Madanpur" },
+            { zone: "South West", district: "Aurangabad", block: "Navinagar" },
+            { zone: "South West", district: "Aurangabad", block: "Obra" },
+            { zone: "South West", district: "Aurangabad", block: "Rafiganj" },
+            { zone: "South West", district: "Buxar", block: "Barhampur" },
+            { zone: "South West", district: "Buxar", block: "Buxar" },
+            { zone: "South West", district: "Buxar", block: "Chakki" },
+            { zone: "South West", district: "Buxar", block: "Chaugain" },
+            { zone: "South West", district: "Buxar", block: "Chausa-2" },
+            { zone: "South West", district: "Buxar", block: "Dumraon" },
+            { zone: "South West", district: "Buxar", block: "Itarhi" },
+            { zone: "South West", district: "Buxar", block: "Kesath" },
+            { zone: "South West", district: "Buxar", block: "Nawanagar" },
+            { zone: "South West", district: "Buxar", block: "Rajpur" },
+            { zone: "South West", district: "Buxar", block: "Simri" },
+            { zone: "South West", district: "Bhojpur", block: "Agiaon" },
+            { zone: "South West", district: "Bhojpur", block: "Ara" },
+            { zone: "South West", district: "Bhojpur", block: "Barhara-2" },
+            { zone: "South West", district: "Bhojpur", block: "Bihiya" },
+            { zone: "South West", district: "Bhojpur", block: "Charpokhari" },
+            { zone: "South West", district: "Bhojpur", block: "Garhani" },
+            { zone: "South West", district: "Bhojpur", block: "Jagdishpur-2" },
+            { zone: "South West", district: "Bhojpur", block: "Koilwar" },
+            { zone: "South West", district: "Bhojpur", block: "Piro" },
+            { zone: "South West", district: "Bhojpur", block: "Sahar" },
+            { zone: "South West", district: "Bhojpur", block: "Sandesh" },
+            { zone: "South West", district: "Bhojpur", block: "Shahpur" },
+            { zone: "South West", district: "Bhojpur", block: "Tarari" },
+            { zone: "South West", district: "Bhojpur", block: "Udwantnagar" },
+            { zone: "South West", district: "Jehanabad", block: "Ghoshi" },
+            { zone: "South West", district: "Jehanabad", block: "Hulasganj" },
+            { zone: "South West", district: "Jehanabad", block: "Jehanabad" },
+            { zone: "South West", district: "Jehanabad", block: "Kako" },
+            { zone: "South West", district: "Jehanabad", block: "Makhdumpur" },
+            { zone: "South West", district: "Jehanabad", block: "Modanganj" },
+            { zone: "South West", district: "Jehanabad", block: "Ratni Faridpur" },
+            { zone: "South West", district: "Kaimur (Bhabua)", block: "Adhuara" },
+            { zone: "South West", district: "Kaimur (Bhabua)", block: "Bhabua" },
+            { zone: "South West", district: "Kaimur (Bhabua)", block: "Bhagwanpur-7" },
+            { zone: "South West", district: "Kaimur (Bhabua)", block: "Chainpur" },
+            { zone: "South West", district: "Kaimur (Bhabua)", block: "Chand" },
+            { zone: "South West", district: "Kaimur (Bhabua)", block: "Durgawati" },
+            { zone: "South West", district: "Kaimur (Bhabua)", block: "Kudra" },
+            { zone: "South West", district: "Kaimur (Bhabua)", block: "Mohania" },
+            { zone: "South West", district: "Kaimur (Bhabua)", block: "Nuaon" },
+            { zone: "South West", district: "Kaimur (Bhabua)", block: "Ramgarh" },
+            { zone: "South West", district: "Kaimur (Bhabua)", block: "Rampur" },
+            { zone: "South West", district: "Rohtas", block: "Akhori Gola" },
+            { zone: "South West", district: "Rohtas", block: "Bikramganj" },
+            { zone: "South West", district: "Rohtas", block: "Chenari" },
+            { zone: "South West", district: "Rohtas", block: "Dawath" },
+            { zone: "South West", district: "Rohtas", block: "Dehri" },
+            { zone: "South West", district: "Rohtas", block: "Dinara" },
+            { zone: "South West", district: "Rohtas", block: "Karakat" },
+            { zone: "South West", district: "Rohtas", block: "Kargahar" },
+            { zone: "South West", district: "Rohtas", block: "Kochas" },
+            { zone: "South West", district: "Rohtas", block: "Nasriganj" },
+            { zone: "South West", district: "Rohtas", block: "Nauhatta-2" },
+            { zone: "South West", district: "Rohtas", block: "Nokha" },
+            { zone: "South West", district: "Rohtas", block: "Rajpur-2" },
+            { zone: "South West", district: "Rohtas", block: "Rohtas" },
+            { zone: "South West", district: "Rohtas", block: "Sanjhauli" },
+            { zone: "South West", district: "Rohtas", block: "Sasaram" },
+            { zone: "South West", district: "Rohtas", block: "Sheosagar" },
+            { zone: "South West", district: "Rohtas", block: "Suryapura" },
+            { zone: "South West", district: "Rohtas", block: "Tilouthu" },
+            
+            // South Central Zone
+            { zone: "South Central", district: "Begusarai", block: "Bachhwara" },
+            { zone: "South Central", district: "Begusarai", block: "Bakhri" },
+            { zone: "South Central", district: "Begusarai", block: "Balia" },
+            { zone: "South Central", district: "Begusarai", block: "Barauni" },
+            { zone: "South Central", district: "Begusarai", block: "Begusarai" },
+            { zone: "South Central", district: "Begusarai", block: "Bhagwanpur-3" },
+            { zone: "South Central", district: "Begusarai", block: "Birpur" },
+            { zone: "South Central", district: "Begusarai", block: "Cheria Bariarpur" },
+            { zone: "South Central", district: "Begusarai", block: "Chorahi" },
+            { zone: "South Central", district: "Begusarai", block: "Dandari" },
+            { zone: "South Central", district: "Begusarai", block: "Garhpura" },
+            { zone: "South Central", district: "Begusarai", block: "Khudabandpur" },
+            { zone: "South Central", district: "Begusarai", block: "Mansurchak" },
+            { zone: "South Central", district: "Begusarai", block: "Matihani" },
+            { zone: "South Central", district: "Begusarai", block: "Naokothi" },
+            { zone: "South Central", district: "Begusarai", block: "Sahebpur Kamal" },
+            { zone: "South Central", district: "Begusarai", block: "Samho Akha Kurha" },
+            { zone: "South Central", district: "Begusarai", block: "Teghra" },
+            { zone: "South Central", district: "Gaya", block: "Amas" },
+            { zone: "South Central", district: "Gaya", block: "Atri" },
+            { zone: "South Central", district: "Gaya", block: "BankeyBazar" },
+            { zone: "South Central", district: "Gaya", block: "Barachatti" },
+            { zone: "South Central", district: "Gaya", block: "Belaganj" },
+            { zone: "South Central", district: "Gaya", block: "Bodhgaya" },
+            { zone: "South Central", district: "Gaya", block: "Dobhi" },
+            { zone: "South Central", district: "Gaya", block: "Dumaria" },
+            { zone: "South Central", district: "Gaya", block: "Fatehpur" },
+            { zone: "South Central", district: "Gaya", block: "Guraru" },
+            { zone: "South Central", district: "Gaya", block: "Gurua" },
+            { zone: "South Central", district: "Gaya", block: "Imamganj" },
+            { zone: "South Central", district: "Gaya", block: "Khizarsarai" },
+            { zone: "South Central", district: "Gaya", block: "Konch" },
+            { zone: "South Central", district: "Gaya", block: "Manpur" },
+            { zone: "South Central", district: "Gaya", block: "Mohanpur-2" },
+            { zone: "South Central", district: "Gaya", block: "Mohra" },
+            { zone: "South Central", district: "Gaya", block: "Nagar" },
+            { zone: "South Central", district: "Gaya", block: "Neem Chak Bathani" },
+            { zone: "South Central", district: "Gaya", block: "Paraiya" },
+            { zone: "South Central", district: "Gaya", block: "Sherghati" },
+            { zone: "South Central", district: "Gaya", block: "Tankuppa" },
+            { zone: "South Central", district: "Gaya", block: "Tekari" },
+            { zone: "South Central", district: "Gaya", block: "Wazirganj" },
+            { zone: "South Central", district: "Lakhisarai", block: "Barahiya" },
+            { zone: "South Central", district: "Lakhisarai", block: "Channan" },
+            { zone: "South Central", district: "Lakhisarai", block: "Halsi" },
+            { zone: "South Central", district: "Lakhisarai", block: "Lakhisarai" },
+            { zone: "South Central", district: "Lakhisarai", block: "Pipariya" },
+            { zone: "South Central", district: "Lakhisarai", block: "Ramgarh Chowk" },
+            { zone: "South Central", district: "Lakhisarai", block: "Suryagarha" },
+            { zone: "South Central", district: "Nalanda", block: "Asthawan" },
+            { zone: "South Central", district: "Nalanda", block: "Ben" },
+            { zone: "South Central", district: "Nalanda", block: "Bihar" },
+            { zone: "South Central", district: "Nalanda", block: "Bind" },
+            { zone: "South Central", district: "Nalanda", block: "Chandi" },
+            { zone: "South Central", district: "Nalanda", block: "Ekangarsarai" },
+            { zone: "South Central", district: "Nalanda", block: "Giriyak" },
+            { zone: "South Central", district: "Nalanda", block: "Harnaut" },
+            { zone: "South Central", district: "Nalanda", block: "Hilsa" },
+            { zone: "South Central", district: "Nalanda", block: "Islampur" },
+            { zone: "South Central", district: "Nalanda", block: "Karai Parsurai" },
+            { zone: "South Central", district: "Nalanda", block: "Katrisarai" },
+            { zone: "South Central", district: "Nalanda", block: "Nagar Nausa" },
+            { zone: "South Central", district: "Nalanda", block: "Noorsarai" },
+            { zone: "South Central", district: "Nalanda", block: "Parbalpur" },
+            { zone: "South Central", district: "Nalanda", block: "Rahui" },
+            { zone: "South Central", district: "Nalanda", block: "Rajgir" },
+            { zone: "South Central", district: "Nalanda", block: "Sarmera" },
+            { zone: "South Central", district: "Nalanda", block: "Silao" },
+            { zone: "South Central", district: "Nalanda", block: "Tharthari" },
+            { zone: "South Central", district: "Nawada", block: "Akbarpur" },
+            { zone: "South Central", district: "Nawada", block: "Govindpur" },
+            { zone: "South Central", district: "Nawada", block: "Hisua" },
+            { zone: "South Central", district: "Nawada", block: "Kashiganj" },
+            { zone: "South Central", district: "Nawada", block: "Kawakole" },
+            { zone: "South Central", district: "Nawada", block: "Meskaur" },
+            { zone: "South Central", district: "Nawada", block: "Nardiganj" },
+            { zone: "South Central", district: "Nawada", block: "Narhat" },
+            { zone: "South Central", district: "Nawada", block: "Nawada" },
+            { zone: "South Central", district: "Nawada", block: "Pakribarawan" },
+            { zone: "South Central", district: "Nawada", block: "Rajauli" },
+            { zone: "South Central", district: "Nawada", block: "Roh" },
+            { zone: "South Central", district: "Nawada", block: "Sirdala" },
+            { zone: "South Central", district: "Nawada", block: "Warisaliganj" },
+            { zone: "South Central", district: "Patna", block: "Athmalgola" },
+            { zone: "South Central", district: "Patna", block: "Bakhtiarpur" },
+            { zone: "South Central", district: "Patna", block: "Barh" },
+            { zone: "South Central", district: "Patna", block: "Belchhi" },
+            { zone: "South Central", district: "Patna", block: "Bihta" },
+            { zone: "South Central", district: "Patna", block: "Bikram" },
+            { zone: "South Central", district: "Patna", block: "Danapur-Cum-Khagaul" },
+            { zone: "South Central", district: "Patna", block: "Daniawan" },
+            { zone: "South Central", district: "Patna", block: "Dhanarua" },
+            { zone: "South Central", district: "Patna", block: "Dulhin Bazar" },
+            { zone: "South Central", district: "Patna", block: "Fatuha" },
+            { zone: "South Central", district: "Patna", block: "Ghoswari" },
+            { zone: "South Central", district: "Patna", block: "Khusrupur" },
+            { zone: "South Central", district: "Patna", block: "Maner" },
+            { zone: "South Central", district: "Patna", block: "Masaurhi" },
+            { zone: "South Central", district: "Patna", block: "Mokama" },
+            { zone: "South Central", district: "Patna", block: "Naubatpur" },
+            { zone: "South Central", district: "Patna", block: "Paliganj" },
+            { zone: "South Central", district: "Patna", block: "Pandarakh" },
+            { zone: "South Central", district: "Patna", block: "Patna Sadar" },
+            { zone: "South Central", district: "Patna", block: "Phulwari" },
+            { zone: "South Central", district: "Patna", block: "Punpun" },
+            { zone: "South Central", district: "Patna", block: "Sampat chak" },
+            { zone: "South Central", district: "Sheikhpura", block: "Ariari" },
+            { zone: "South Central", district: "Sheikhpura", block: "Barbigha" },
+            { zone: "South Central", district: "Sheikhpura", block: "Chewara" },
+            { zone: "South Central", district: "Sheikhpura", block: "Ghat kusumbha" },
+            { zone: "South Central", district: "Sheikhpura", block: "Sheikhpura" },
+            { zone: "South Central", district: "Sheikhpura", block: "Shekhopur Sarai" },
+            
+            // SouthEast Zone
+            { zone: "SouthEast", district: "Banka", block: "Amarpur" },
+            { zone: "SouthEast", district: "Banka", block: "Banka" },
+            { zone: "SouthEast", district: "Banka", block: "Barhat" },
+            { zone: "SouthEast", district: "Banka", block: "Bausi" },
+            { zone: "SouthEast", district: "Banka", block: "Belhar" },
+            { zone: "SouthEast", district: "Banka", block: "Chanan" },
+            { zone: "SouthEast", district: "Banka", block: "Dhuraiya" },
+            { zone: "SouthEast", district: "Banka", block: "Katoria" },
+            { zone: "SouthEast", district: "Banka", block: "Phulidumar" },
+            { zone: "SouthEast", district: "Banka", block: "Rajaun" },
+            { zone: "SouthEast", district: "Banka", block: "Sambhuganj" },
+            { zone: "SouthEast", district: "Bhagalpur", block: "Bihpur" },
+            { zone: "SouthEast", district: "Bhagalpur", block: "Gopalpur" },
+            { zone: "SouthEast", district: "Bhagalpur", block: "Goradih" },
+            { zone: "SouthEast", district: "Bhagalpur", block: "Ismailpur" },
+            { zone: "SouthEast", district: "Bhagalpur", block: "Jagdishpur" },
+            { zone: "SouthEast", district: "Bhagalpur", block: "Kahalgaon" },
+            { zone: "SouthEast", district: "Bhagalpur", block: "Kharik" },
+            { zone: "SouthEast", district: "Bhagalpur", block: "Narayanpur" },
+            { zone: "SouthEast", district: "Bhagalpur", block: "Nathnagar" },
+            { zone: "SouthEast", district: "Bhagalpur", block: "Navgachhiya" },
+            { zone: "SouthEast", district: "Bhagalpur", block: "Pirpaiti" },
+            { zone: "SouthEast", district: "Bhagalpur", block: "Rangra Chowk" },
+            { zone: "SouthEast", district: "Bhagalpur", block: "Sanhaula" },
+            { zone: "SouthEast", district: "Bhagalpur", block: "Shahkund" },
+            { zone: "SouthEast", district: "Bhagalpur", block: "Sultanganj" },
+            { zone: "SouthEast", district: "Jamui", block: "Barhat-2" },
+            { zone: "SouthEast", district: "Jamui", block: "Chakai" },
+            { zone: "SouthEast", district: "Jamui", block: "Gidhaur" },
+            { zone: "SouthEast", district: "Jamui", block: "Islamnagar Aliganj" },
+            { zone: "SouthEast", district: "Jamui", block: "Jamui" },
+            { zone: "SouthEast", district: "Jamui", block: "Jhajha" },
+            { zone: "SouthEast", district: "Jamui", block: "Khaira" },
+            { zone: "SouthEast", district: "Jamui", block: "Lakshmipur" },
+            { zone: "SouthEast", district: "Jamui", block: "Sikandra" },
+            { zone: "SouthEast", district: "Jamui", block: "Sonho" },
+            { zone: "SouthEast", district: "Katihar", block: "Amdabad" },
+            { zone: "SouthEast", district: "Katihar", block: "Azamnagar" },
+            { zone: "SouthEast", district: "Katihar", block: "Balrampur" },
+            { zone: "SouthEast", district: "Katihar", block: "Barari" },
+            { zone: "SouthEast", district: "Katihar", block: "Barsoi" },
+            { zone: "SouthEast", district: "Katihar", block: "Dandkhora" },
+            { zone: "SouthEast", district: "Katihar", block: "Falka" },
+            { zone: "SouthEast", district: "Katihar", block: "Hasanganj" },
+            { zone: "SouthEast", district: "Katihar", block: "Kadwa" },
+            { zone: "SouthEast", district: "Katihar", block: "Katihar" },
+            { zone: "SouthEast", district: "Katihar", block: "Korha" },
+            { zone: "SouthEast", district: "Katihar", block: "Kursela" },
+            { zone: "SouthEast", district: "Katihar", block: "Manihari" },
+            { zone: "SouthEast", district: "Katihar", block: "Mansahi" },
+            { zone: "SouthEast", district: "Katihar", block: "Pranpur" },
+            { zone: "SouthEast", district: "Katihar", block: "Sameli" },
+            { zone: "SouthEast", district: "Khagaria", block: "Alauli" },
+            { zone: "SouthEast", district: "Khagaria", block: "Beldaur" },
+            { zone: "SouthEast", district: "Khagaria", block: "Chautham" },
+            { zone: "SouthEast", district: "Khagaria", block: "Gogri" },
+            { zone: "SouthEast", district: "Khagaria", block: "Khagaria" },
+            { zone: "SouthEast", district: "Khagaria", block: "Mansi" },
+            { zone: "SouthEast", district: "Khagaria", block: "Parbatta" },
+            { zone: "SouthEast", district: "Munger", block: "Asarganj" },
+            { zone: "SouthEast", district: "Munger", block: "Bariarpur" },
+            { zone: "SouthEast", district: "Munger", block: "Dharhara" },
+            { zone: "SouthEast", district: "Munger", block: "Jamalpur" },
+            { zone: "SouthEast", district: "Munger", block: "Kharagpur" },
+            { zone: "SouthEast", district: "Munger", block: "Munger" },
+            { zone: "SouthEast", district: "Munger", block: "Sangrampur-1" },
+            { zone: "SouthEast", district: "Munger", block: "Tarapur" },
+            { zone: "SouthEast", district: "Munger", block: "Tetiah Bambar" }
+    ];
+           
+
+        // Initialize calendar
+        const datePicker = flatpickr("#date-range", {
+            mode: "range",
+            dateFormat: "Y-m-d",
+            allowInput: true,
+            maxDate: "today",
+            locale: {
+                firstDayOfWeek: 1
+            },
+            onChange: function(selectedDates, dateStr, instance) {
+                updateDateRangeInfo(selectedDates);
+                updateDashboard();
+            }
+        });
+
+        // Update date range info display
+        function updateDateRangeInfo(selectedDates) {
+            const dateInfo = document.getElementById('date-range-info');
+            
+            if (selectedDates.length === 2) {
+                const startDate = selectedDates[0];
+                const endDate = selectedDates[1];
+                
+                const formatDate = (date) => {
+                    return date.toLocaleDateString('en-US', { 
+                        month: 'short', 
+                        day: 'numeric',
+                        year: 'numeric'
+                    });
+                };
+                
+                dateInfo.innerHTML = `<i class="far fa-calendar"></i><span>${formatDate(startDate)} - ${formatDate(endDate)}</span>`;
+            } else if (selectedDates.length === 1) {
+                const date = selectedDates[0];
+                dateInfo.innerHTML = `<i class="far fa-calendar"></i><span>${date.toLocaleDateString('en-US', { 
+                    month: 'long', 
+                    day: 'numeric',
+                    year: 'numeric'
+                })}</span>`;
+            } else {
+                dateInfo.innerHTML = `<i class="far fa-calendar"></i><span>Current Month</span>`;
+            }
+        }
+
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-toggle').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('active');
+        });
+
+        // Populate district and block dropdowns
+        function populateLocationDropdowns() {
+            const zoneSelect = document.getElementById('zone-select');
+            const districtSelect = document.getElementById('district-select');
+            const blockSelect = document.getElementById('block-select');
+            
+            // Get unique zones, districts, and blocks
+            const zones = [...new Set(biharData.map(item => item.zone))];
+            const districts = [...new Set(biharData.map(item => item.district))];
+            const blocks = [...new Set(biharData.map(item => item.block))];
+            
+            // Populate zone dropdown
+            zones.forEach(zone => {
+                const option = document.createElement('option');
+                option.value = zone;
+                option.textContent = zone;
+                zoneSelect.appendChild(option);
+            });
+            
+            // Populate district dropdown
+            districts.forEach(district => {
+                const option = document.createElement('option');
+                option.value = district;
+                option.textContent = district;
+                districtSelect.appendChild(option);
+            });
+            
+            // Populate block dropdown
+            blocks.forEach(block => {
+                const option = document.createElement('option');
+                option.value = block;
+                option.textContent = block;
+                blockSelect.appendChild(option);
+            });
+            
+            // Add event listeners for filtering
+            zoneSelect.addEventListener('change', filterDistrictsByZone);
+            districtSelect.addEventListener('change', filterBlocksByDistrict);
+        }
+        
+        function filterDistrictsByZone() {
+            const zone = document.getElementById('zone-select').value;
+            const districtSelect = document.getElementById('district-select');
+            
+            // Clear existing options except "All Districts"
+            districtSelect.innerHTML = '<option value="all">All Districts</option>';
+            
+            if (zone === 'all') {
+                // Show all districts
+                const allDistricts = [...new Set(biharData.map(item => item.district))];
+                allDistricts.forEach(district => {
+                    const option = document.createElement('option');
+                    option.value = district;
+                    option.textContent = district;
+                    districtSelect.appendChild(option);
+                });
+            } else {
+                // Show districts only for selected zone
+                const filteredDistricts = [...new Set(biharData
+                    .filter(item => item.zone === zone)
+                    .map(item => item.district))];
+                
+                filteredDistricts.forEach(district => {
+                    const option = document.createElement('option');
+                    option.value = district;
+                    option.textContent = district;
+                    districtSelect.appendChild(option);
+                });
+            }
+            
+            // Reset block filter
+            document.getElementById('block-select').value = 'all';
+            updateDashboard();
+        }
+        
+        function filterBlocksByDistrict() {
+            const district = document.getElementById('district-select').value;
+            const blockSelect = document.getElementById('block-select');
+            const zone = document.getElementById('zone-select').value;
+            
+            // Clear existing options except "All Blocks"
+            blockSelect.innerHTML = '<option value="all">All Blocks</option>';
+            
+            if (district === 'all') {
+                // Show all blocks (filtered by zone if selected)
+                let filteredBlocks;
+                if (zone === 'all') {
+                    filteredBlocks = [...new Set(biharData.map(item => item.block))];
+                } else {
+                    filteredBlocks = [...new Set(biharData
+                        .filter(item => item.zone === zone)
+                        .map(item => item.block))];
+                }
+                
+                filteredBlocks.forEach(block => {
+                    const option = document.createElement('option');
+                    option.value = block;
+                    option.textContent = block;
+                    blockSelect.appendChild(option);
+                });
+            } else {
+                // Show blocks only for selected district
+                const filteredBlocks = [...new Set(biharData
+                    .filter(item => item.district === district)
+                    .map(item => item.block))];
+                
+                filteredBlocks.forEach(block => {
+                    const option = document.createElement('option');
+                    option.value = block;
+                    option.textContent = block;
+                    blockSelect.appendChild(option);
+                });
+            }
+            
+            updateDashboard();
+        }
+
+        // Chart period controls
+        const periodControls = document.querySelectorAll('.chart-control[data-period]');
+        periodControls.forEach(control => {
+            control.addEventListener('click', function() {
+                periodControls.forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+                updateMainChart(this.dataset.period);
+            });
+        });
+
+        // Data source controls
+        const historicBtn = document.getElementById('historic-btn');
+        const dailyBtn = document.getElementById('daily-btn');
+        
+        historicBtn.addEventListener('click', function() {
+            historicBtn.classList.add('active');
+            dailyBtn.classList.remove('active');
+            updateDataDisplay('historic');
+        });
+        
+        dailyBtn.addEventListener('click', function() {
+            dailyBtn.classList.remove('active');
+            historicBtn.classList.add('active');
+            updateDataDisplay('daily');
+        });
+
+        // Filter controls
+        const parameterSelect = document.getElementById('parameter-select');
+        
+        parameterSelect.addEventListener('change', updateDashboard);
+        document.getElementById('zone-select').addEventListener('change', updateDashboard);
+        document.getElementById('district-select').addEventListener('change', updateDashboard);
+        document.getElementById('block-select').addEventListener('change', updateDashboard);
+
+        // Initialize charts
+        let mainChart;
+        
+        function initCharts() {
+            const mainCtx = document.getElementById('main-chart').getContext('2d');
+            
+            // Main chart data
+            const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const data = [158.0, 51.0, 163.2, 17.6, -97.6, -99.0, -87.4, 300.8, 67.8, -30.7, -44.0, -37.3];
+            
+            // Create gradient for bars
+            const gradient = mainCtx.createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, 'rgba(52, 168, 83, 0.8)');
+            gradient.addColorStop(1, 'rgba(52, 168, 83, 0.2)');
+            
+            const negativeGradient = mainCtx.createLinearGradient(0, 0, 0, 300);
+            negativeGradient.addColorStop(0, 'rgba(234, 67, 53, 0.8)');
+            negativeGradient.addColorStop(1, 'rgba(234, 67, 53, 0.2)');
+            
+            const backgroundColors = data.map(value => value >= 0 ? gradient : negativeGradient);
+            
+            mainChart = new Chart(mainCtx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Deviation from Normal',
+                        data: data,
+                        backgroundColor: backgroundColors,
+                        borderColor: data.map(value => value >= 0 ? '#34a853' : '#ea4335'),
+                        borderWidth: 1,
+                        borderRadius: 4,
+                        barPercentage: 0.7,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return value + ' mm';
+                                },
+                                font: {
+                                    size: 12,
+                                    family: "'Segoe UI', sans-serif"
+                                },
+                                color: '#5f6368',
+                                padding: 8
+                            },
+                            title: {
+                                display: true,
+                                text: 'Deviation (mm)',
+                                font: {
+                                    size: 13,
+                                    weight: '600'
+                                },
+                                color: '#5f6368',
+                                padding: {top: 10, bottom: 5}
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: {
+                                    size: 12,
+                                    family: "'Segoe UI', sans-serif"
+                                },
+                                color: '#5f6368',
+                                maxRotation: 0
+                            },
+                            title: {
+                                display: true,
+                                text: 'Month',
+                                font: {
+                                    size: 13,
+                                    weight: '600'
+                                },
+                                color: '#5f6368',
+                                padding: {top: 5, bottom: 10}
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                padding: 15,
+                                usePointStyle: true,
+                                pointStyle: 'rect',
+                                font: {
+                                    size: 12,
+                                    family: "'Segoe UI', sans-serif"
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(32, 33, 36, 0.9)',
+                            titleFont: {
+                                size: 13,
+                                family: "'Segoe UI', sans-serif"
+                            },
+                            bodyFont: {
+                                size: 13,
+                                family: "'Segoe UI', sans-serif"
+                            },
+                            padding: 12,
+                            cornerRadius: 6,
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.raw;
+                                    const status = value >= 0 ? 'Above Normal' : 'Below Normal';
+                                    const absValue = Math.abs(value);
+                                    const unit = parameterSelect.value === 'rainfall' ? 'mm' : 
+                                                parameterSelect.value === 'temperature' ? '°C' : '%';
+                                    return `${status}: ${absValue}${unit}`;
+                                },
+                                title: function(tooltipItems) {
+                                    const month = tooltipItems[0].label;
+                                    return `${month} - ${parameterSelect.value === 'rainfall' ? 'Rainfall' : 
+                                           parameterSelect.value === 'temperature' ? 'Temperature' : 
+                                           parameterSelect.value === 'humidity' ? 'Humidity' : 
+                                           parameterSelect.value === 'wind' ? 'Wind Speed' : 'Pressure'}`;
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+        }
+        
+        // Update main chart based on selected period
+        function updateMainChart(period) {
+            let labels, data, xAxisTitle;
+            
+            if (period === 'daily') {
+                labels = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31'];
+                data = [15, 22, -8, 34, -12, 28, 19, -5, 31, 17, -9, 25, 14, -3, 27];
+                xAxisTitle = 'Day of Month';
+            } else if (period === 'monthly') {
+                labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                data = [158.0, 51.0, 163.2, 17.6, -97.6, -99.0, -87.4, 300.8, 67.8, -30.7, -44.0, -37.3];
+                xAxisTitle = 'Month';
+            } else { // yearly
+                labels = [ '2022', '2023', '2024', '2025'];
+                data = [45, 78, -23, 112, -56, 89, 134, 67];
+                xAxisTitle = 'Year';
+            }
+            
+            mainChart.data.labels = labels;
+            mainChart.data.datasets[0].data = data;
+            mainChart.options.scales.x.title.text = xAxisTitle;
+            
+            // Update colors based on positive/negative values
+            const gradient = mainChart.ctx.createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, 'rgba(52, 168, 83, 0.8)');
+            gradient.addColorStop(1, 'rgba(52, 168, 83, 0.2)');
+            
+            const negativeGradient = mainChart.ctx.createLinearGradient(0, 0, 0, 300);
+            negativeGradient.addColorStop(0, 'rgba(234, 67, 53, 0.8)');
+            negativeGradient.addColorStop(1, 'rgba(234, 67, 53, 0.2)');
+            
+            mainChart.data.datasets[0].backgroundColor = data.map(value => value >= 0 ? gradient : negativeGradient);
+            mainChart.data.datasets[0].borderColor = data.map(value => value >= 0 ? '#34a853' : '#ea4335');
+            
+            // Update unit based on parameter
+            const parameter = document.getElementById('parameter-select').value;
+            const unit = parameter === 'rainfall' ? 'mm' : 
+                        parameter === 'temperature' ? '°C' : 
+                        parameter === 'humidity' ? '%' : 
+                        parameter === 'wind' ? 'km/h' : 'hPa';
+            
+            mainChart.options.scales.y.title.text = `Deviation (${unit})`;
+            mainChart.options.scales.y.ticks.callback = function(value) {
+                return value + ' ' + unit;
+            };
+            
+            mainChart.update();
+            
+            // Update date range info
+            const dateInfo = document.getElementById('date-range-info');
+            if (period === 'daily') {
+                dateInfo.innerHTML = `<i class="far fa-calendar"></i><span>Current Month (Days 1-15)</span>`;
+            } else if (period === 'monthly') {
+                dateInfo.innerHTML = `<i class="far fa-calendar"></i><span>Current Year</span>`;
+            } else {
+                dateInfo.innerHTML = `<i class="far fa-calendar"></i><span>2018-2025</span>`;
+            }
+        }
+        
+        // Update data display based on historic/daily selection
+        function updateDataDisplay(source) {
+            const lastUpdate = document.querySelector('#update-indicator span');
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            if (source === 'daily') {
+                lastUpdate.textContent = `Last updated: Today ${timeString}`;
+                // In a real app, you would fetch the latest daily data here
+            } else {
+                lastUpdate.textContent = `Last updated: Today 11:00 AM (Historic Data)`;
+                // In a real app, you would fetch the historic data here
+            }
+            
+            updateDashboard();
+        }
+        
+        // Update entire dashboard based on selections
+        function updateDashboard() {
+            const parameter = parameterSelect.value;
+            const zone = document.getElementById('zone-select').value;
+            const district = document.getElementById('district-select').value;
+            const block = document.getElementById('block-select').value;
+            
+            // Update chart titles
+            const mainChartTitle = document.getElementById('main-chart-title');
+            const deficientTitle = document.getElementById('deficient-title');
+            const zoneIndicator = document.getElementById('zone-indicator');
+            
+            const parameterNames = {
+                'rainfall': 'Rainfall',
+                'temperature': 'Temperature',
+                'humidity': 'Humidity',
+                'wind': 'Wind Speed',
+                'pressure': 'Pressure'
+            };
+            
+            const paramName = parameterNames[parameter];
+            mainChartTitle.textContent = `${paramName} Deviation from Normal`;
+            deficientTitle.textContent = `${paramName} Deficient Areas`;
+            zoneIndicator.textContent = zone === 'all' ? 'All Zones' : zone;
+            
+            // Update chart with current parameter
+            updateChartForParameter(parameter);
+            
+            // Update deficient areas table
+            updateDeficientAreas(parameter, zone, district, block);
+            
+            // Update stats cards based on parameter
+            updateStatsCards(parameter);
+        }
+        
+        // Update chart for selected parameter
+        function updateChartForParameter(parameter) {
+            // Update chart data based on parameter
+            if (mainChart) {
+                // Get current period
+                const activePeriod = document.querySelector('.chart-control.active[data-period]');
+                const period = activePeriod ? activePeriod.dataset.period : 'monthly';
+                
+                // Update chart with new data for selected parameter
+                updateMainChart(period);
+            }
+        }
+        
+        // Update deficient areas table
+        function updateDeficientAreas(parameter, zone, district, block) {
+            const tableBody = document.getElementById('deficient-areas');
+            tableBody.innerHTML = '';
+            
+            // Filter data based on selections
+            let filteredData = biharData;
+            
+            if (zone !== 'all') {
+                filteredData = filteredData.filter(item => item.zone === zone);
+            }
+            
+            if (district !== 'all') {
+                filteredData = filteredData.filter(item => item.district === district);
+            }
+            
+            if (block !== 'all') {
+                filteredData = filteredData.filter(item => item.block === block);
+            }
+            
+            // Generate sample deviation data for filtered areas
+            const deficientAreas = filteredData.map(area => {
+                // Generate random deviation between -40 and +40
+                const deviation = (Math.random() * 80 - 40).toFixed(1);
+                let status = 'normal';
+                
+                if (deviation < -15) status = 'deficit';
+                else if (deviation > 15) status = 'excess';
+                
+                return {
+                    zone: area.zone,
+                    district: area.district,
+                    block: area.block,
+                    deviation: parseFloat(deviation),
+                    status: status
+                };
+            });
+            
+            // Sort by deviation (most deficient first)
+            deficientAreas.sort((a, b) => a.deviation - b.deviation);
+            
+            // Take top 8 for display
+            const displayAreas = deficientAreas.slice(0, 8);
+            
+            if (displayAreas.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td colspan="5" style="text-align: center; color: var(--gray); padding: 20px;">No areas found for the selected filters</td>`;
+                tableBody.appendChild(row);
+            } else {
+                displayAreas.forEach(area => {
+                    const row = document.createElement('tr');
+                    
+                    const statusClass = `status-${area.status}`;
+                    const statusText = area.status === 'deficit' ? 'Deficit' : 
+                                     area.status === 'excess' ? 'Excess' : 'Normal';
+                    
+                    const deviationSign = area.deviation >= 0 ? '+' : '';
+                    const deviationClass = area.deviation >= 0 ? 'positive' : 'negative';
+                    
+                    row.innerHTML = `
+                        <td>${area.zone}</td>
+                        <td>${area.district}</td>
+                        <td>${area.block}</td>
+                        <td class="${deviationClass}">${deviationSign}${area.deviation}%</td>
+                        <td><span class="status-indicator ${statusClass}"></span>${statusText}</td>
+                    `;
+                    
+                    tableBody.appendChild(row);
+                });
+            }
+        }
+        
+        // Update stats cards based on selected parameter
+        function updateStatsCards(parameter) {
+            const statCards = document.querySelectorAll('.stat-card');
+            const statValues = document.querySelectorAll('.stat-value');
+            const statChanges = document.querySelectorAll('.stat-change');
+            
+            // Sample data for different parameters
+            const parameterData = {
+                rainfall: {
+                    values: ['158.0 mm', '31.2°C', '67.8%', '12.4 km/h'],
+                    changes: [8.5, 2.3, -5.7, 1.8],
+                    titles: ['Current Rainfall', 'Temperature', 'Humidity', 'Wind Speed'],
+                    icons: ['fa-cloud-rain', 'fa-thermometer-half', 'fa-tint', 'fa-wind']
+                },
+                temperature: {
+                    values: ['31.2°C', '24.8°C', '78%', '10.2 km/h'],
+                    changes: [2.3, -1.2, 3.4, -0.5],
+                    titles: ['Avg Temperature', 'Min Temperature', 'Humidity', 'Wind Speed'],
+                    icons: ['fa-thermometer-half', 'fa-thermometer-empty', 'fa-tint', 'fa-wind']
+                },
+                humidity: {
+                    values: ['67.8%', '29.4°C', '78%', '8.7 km/h'],
+                    changes: [-5.7, 1.8, 2.3, -1.2],
+                    titles: ['Humidity', 'Temperature', 'Max Humidity', 'Wind Speed'],
+                    icons: ['fa-tint', 'fa-thermometer-half', 'fa-tint', 'fa-wind']
+                },
+                wind: {
+                    values: ['12.4 km/h', '30.1°C', '65%', '1013 hPa'],
+                    changes: [1.8, 0.9, -2.1, 0.3],
+                    titles: ['Wind Speed', 'Temperature', 'Humidity', 'Pressure'],
+                    icons: ['fa-wind', 'fa-thermometer-half', 'fa-tint', 'fa-tachometer-alt']
+                },
+                pressure: {
+                    values: ['1013 hPa', '28.7°C', '72%', '9.8 km/h'],
+                    changes: [0.3, -0.7, 1.2, -0.8],
+                    titles: ['Pressure', 'Temperature', 'Humidity', 'Wind Speed'],
+                    icons: ['fa-tachometer-alt', 'fa-thermometer-half', 'fa-tint', 'fa-wind']
+                }
+            };
+            
+            const data = parameterData[parameter];
+            
+            statCards.forEach((card, index) => {
+                // Update card title
+                card.querySelector('h3').textContent = data.titles[index];
+                
+                // Update value
+                statValues[index].textContent = data.values[index];
+                
+                // Update change indicator
+                const change = data.changes[index];
+                const changeElement = statChanges[index];
+                changeElement.innerHTML = `<i class="fas fa-${change >= 0 ? 'arrow-up' : 'arrow-down'}"></i>${Math.abs(change)}% ${change >= 0 ? 'above' : 'below'} normal`;
+                
+                // Update color class
+                changeElement.className = `stat-change ${change >= 0 ? 'positive' : 'negative'}`;
+                
+                // Update icon
+                const icon = card.querySelector('.weather-icon');
+                icon.className = `fas ${data.icons[index]} weather-icon`;
+            });
+        }
+        
+        // Simulate daily data update
+        function simulateDailyUpdate() {
+            const updateIndicator = document.querySelector('#update-indicator i');
+            updateIndicator.classList.add('fa-spin');
+            
+            setTimeout(() => {
+                updateIndicator.classList.remove('fa-spin');
+                
+                // Update the time
+                const now = new Date();
+                const timeString = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                document.querySelector('#update-indicator span').textContent = `Last updated: Today ${timeString}`;
+                
+                // Update dashboard with fresh data
+                updateDashboard();
+                
+                // Show notification
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 15px;
+                    right: 15px;
+                    background-color: #34a853;
+                    color: white;
+                    padding: 10px 16px;
+                    border-radius: 6px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    z-index: 1000;
+                    font-size: 13px;
+                    display: flex;
+                    align-items: center;
+                `;
+                notification.innerHTML = `<i class="fas fa-check-circle" style="margin-right: 6px;"></i>Daily data updated successfully`;
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.remove();
+                }, 2500);
+            }, 800);
+        }
+        
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            // Populate dropdowns with Bihar data
+            populateLocationDropdowns();
+            
+            // Initialize charts
+            initCharts();
+            
+            // Initial dashboard update
+            updateDashboard();
+            
+            // Set initial active period
+            updateMainChart('daily');
+            
+            // Simulate data update on click
+            const updateIndicator = document.querySelector('#update-indicator');
+            updateIndicator.style.cursor = 'pointer';
+            updateIndicator.title = 'Click to simulate daily data update';
+            updateIndicator.addEventListener('click', simulateDailyUpdate);
+            
+            // Close sidebar when clicking outside on mobile
+            document.addEventListener('click', function(event) {
+                const sidebar = document.getElementById('sidebar');
+                const toggle = document.getElementById('mobile-menu-toggle');
+                
+                if (window.innerWidth <= 768 && 
+                    sidebar.classList.contains('active') && 
+                    !sidebar.contains(event.target) && 
+                    !toggle.contains(event.target)) {
+                    sidebar.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
